@@ -11,6 +11,11 @@ import { Router, Route, browserHistory } from 'react-router';
 import App from './components/App.jsx';
 import Home from './pages/Home.jsx';
 import Step1 from './pages/Step1.jsx';
+import Step2 from './pages/Step2.js';
+import Step3 from './pages/Step3.js';
+import Step4 from './pages/Step4.js';
+import Step5 from './pages/Step5.js';
+import Thanks from './pages/Thanks.js';
 
 
 ReactDom.render((
@@ -18,6 +23,11 @@ ReactDom.render((
 		<Route component={App}>
 			<Route path="/" component={Home}/>
 			<Route path="/buoc-1" component={Step1}/>
+			<Route path="/buoc-2" component={Step2}/>
+			<Route path="/buoc-3" component={Step3}/>
+			<Route path="/buoc-4" component={Step4}/>
+			<Route path="/buoc-5" component={Step5}/>
+			<Route path="/cam-on" component={Thanks}/>
 		</Route>
 	</Router>
 ), document.getElementById('app'))
