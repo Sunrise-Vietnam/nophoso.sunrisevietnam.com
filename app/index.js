@@ -1,9 +1,13 @@
+//import i18n from './libs/i18n.js';
 require('expose?$!expose?jQuery!jquery');
 require("bootstrap-webpack");
 require('./libs/formValidation/dist/js/formValidation.min.js');
+require('./libs/formValidation/dist/js/framework/bootstrap.min.js');
 require('./libs/formValidation/dist/js/language/vi_VN');
 require('./libs/formValidation/dist/css/formValidation.min.css');
-
+require('./index.css');
+require('react-dropzone');
+/*require('//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css')*/
 import React from 'react';
 import ReactDom from 'react-dom';
 import { Router, Route, browserHistory } from 'react-router';

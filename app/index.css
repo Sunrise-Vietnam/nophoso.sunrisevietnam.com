@@ -1,0 +1,111 @@
+/* Color of invalid field */
+.field-error .control-label,
+.field-error .help-block,
+.field-error .form-control-feedback {
+    color: #a94442;
+}
+/* Color of valid field */
+.field-success .control-label,
+.field-success .help-block,
+.field-success .form-control-feedback {
+    color: #3c763d;
+}
+.selectContainer .form-control-feedback {
+    top: 0;
+    right: -40px;
+    line-height:38px;
+}
+.form-control-feedback {
+    position: absolute;
+    display:block;
+    text-align: left;
+    height:38px;
+    line-height:38px;
+}
+.jumbotron{
+    margin-top: 20%;
+    margin-bottom: 20%;
+}
+.blue, input.form-control, select.form-control, textarea.form-control   {
+    color: #06162f;
+}
+hr.hr-style {
+    border: 0;
+    height: 1px;
+    background: #24a2fb;
+    background-image: linear-gradient(to right, #fbfafa, #24a2fb, #fbfafa);
+}
+.smallspace {
+    height: 20px
+}
+.form-control {
+    border: solid 1px #06162f;
+    height: 38px
+}
+.form-control.noneborder {
+    border: none;
+    box-shadow: none
+}
+::-webkit-input-placeholder {
+    font-style: italic;
+}
+:-moz-placeholder {
+    font-style: italic;
+}
+::-moz-placeholder {
+    font-style: italic;
+}
+:-ms-input-placeholder {
+    font-style: italic;
+}
+
+.sublabel {
+    font-weight: normal;
+}
+.form-group:focus {
+    color: green
+}
+.bg-table {
+    /*background-color: #fff6de;*/
+    margin-top:15px;
+}
+.table-hover > tbody > tr:hover {
+    background-color: #f9f2f4;
+}
+.green {
+    color: #398439;
+}
+
+.bgwhite {
+    background-color: #fff6de;
+}
+@media (max-width: 991px) {
+    .margin-space{
+        margin-bottom: 15px;
+    }
+    hr.hr-style {
+        margin: 25px 20px 25px 20px;
+    }
+    .panel-title {
+        font-size: 18px;
+    }
+    h4 {
+        font-size: 14px;
+        line-height: 27px
+    }
+    .form-horizontal .control-label {
+        text-align: left;
+    }
+}
+@media (min-width: 992px) {
+    hr.hr-style {
+        margin: 50px 120px 50px 120px;
+    }
+    .panel-title {
+        font-size: 20px;
+    }
+    h4 {
+        font-size: 16px;
+        line-height: 30px
+    }
+}

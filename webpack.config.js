@@ -3,6 +3,7 @@ var path = require('path');
 var HtmlwebpackPlugin = require('html-webpack-plugin');
 var webpack = require('webpack');
 var merge = require('webpack-merge');
+var I18nPlugin = require('i18next-webpack-plugin');
 
 
 const TARGET = process.env.npm_lifecycle_event;
