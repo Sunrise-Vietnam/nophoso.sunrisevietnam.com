@@ -1,4 +1,4 @@
-//import i18n from './libs/i18n.js';
+import './libs/i18n.js';
 require('expose?$!expose?jQuery!jquery');
 require("bootstrap-webpack");
 require('./libs/formValidation/dist/js/formValidation.min.js');
