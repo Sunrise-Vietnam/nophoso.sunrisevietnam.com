@@ -15,6 +15,7 @@ export default class Step5 extends React.Component{
         };
         this._preStep = this._preStep.bind(this);
         this._nextStep = this._nextStep.bind(this);
+
     }
 
     componentWillMount() {
@@ -26,22 +27,6 @@ export default class Step5 extends React.Component{
 
     componentDidMount() {
         document.title = 'Bước 5 - Tải tài liệu - Nộp hồ sơ online - SUNRISE VIETNAM Co.,Ltd';
-        $('#formStep2')
-            .formValidation({
-                framework: 'bootstrap',
-                icon: {
-                    valid: 'glyphicon glyphicon-ok',
-                    invalid: 'glyphicon glyphicon-remove',
-                    validating: 'glyphicon glyphicon-refresh'
-                },
-                row: {
-                    valid: 'field-success',
-                    invalid: 'field-error'
-                },
-                fields: {
-
-                }
-            })
     }
 
     _preStep(e) {
@@ -80,7 +65,7 @@ export default class Step5 extends React.Component{
                         <span className="green">Bước 2&nbsp;&nbsp;</span><span className="glyphicon glyphicon-chevron-right"></span>&nbsp;&nbsp;
                         <span className="green">Bước 3&nbsp;&nbsp;</span><span className="glyphicon glyphicon-chevron-right"></span>&nbsp;&nbsp;
                         <span className="green">Bước 4&nbsp;&nbsp;</span><span className="glyphicon glyphicon-chevron-right"></span>&nbsp;&nbsp;
-                        Bước 5 - Tải tài liệu
+                        Bước 5
                     </b></h3>
                 </div>
                 <div className="panel-body">
@@ -92,9 +77,7 @@ export default class Step5 extends React.Component{
                         </div>
                         <div className="col-md-12">
                             <div className="form-group">
-                                <label>Tải file</label>
-                                <input type="file" name="" id="inputFile" multiple/>
-                                <p className="help-block"></p>
+
                             </div>
                         </div>
                     </div>

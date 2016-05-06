@@ -145,11 +145,6 @@ export default class Step1 extends React.Component {
                         validators: {
                             notEmpty: {
                                 message: 'Bạn chưa nhập ngày cấp hộ chiếu'
-                            },
-                            date: {
-                                format: 'DD/MM/YYYY',
-                                min: 'dDoB',
-                                message: 'Xin nhập ngày cấp hộ chiếu sau ngày sinh'
                             }
                         }
                     },
@@ -387,8 +382,9 @@ export default class Step1 extends React.Component {
 
     _nextStep(e) {
         e.preventDefault();
-        console.info(this.state.step1);
+
         let isValid = $('#formStep1').data('formValidation').validate().isValid();
+        //console.info(this.state.step1, isValid);
         if(isValid){
             this.props.history.pushState(null, "/buoc-2");
         }
@@ -805,7 +801,7 @@ export default class Step1 extends React.Component {
                 <div className="panel-footer">
                     <div className="row">
                         <div className="col-xs-6 col-xs-offset-6 col-md-2 col-md-offset-10">
-                            <button type="submit" className="btn btn-primary" onClick={this._nextStep}>Bước <span
+                            <button type="button" className="btn btn-primary" onClick={this._nextStep}>Bước <span
                                 className="badge">2</span></button>
                         </div>
                     </div>

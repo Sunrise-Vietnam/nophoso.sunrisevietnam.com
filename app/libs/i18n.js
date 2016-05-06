@@ -20,7 +20,7 @@ i18n.init({
 	resources: resBundle
 },(err, t) => {
 	// initialized and ready to go!
-	console.info('loaded....',t('welcome:h4'));
+	console.info('loaded....');
 });
 
 window.i18n = i18n;

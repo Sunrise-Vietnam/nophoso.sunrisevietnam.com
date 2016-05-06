@@ -109,3 +109,9 @@ hr.hr-style {
         line-height: 30px
     }
 }
+
+.dropzone{
+    width: auto; height: 70px; border: 2px dashed rgb(102, 102, 102); border-radius: 5px;
+    padding : 10px 10px;
+    font-weight: bold;
+}
