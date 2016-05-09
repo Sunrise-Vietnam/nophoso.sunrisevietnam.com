@@ -11,17 +11,10 @@ const mimeTypes = ['application/x-rar','application/zip', 'application/pdf'];
 const _50MbtoBytes = 5e+7;
 const _DropBox = {
     postUrl : 'https://content.dropboxapi.com/2/files/upload',
-    headers : {
-        "Authorization" : "Bearer jop_2cNYe7AAAAAAAAAAB6L8o-5SDAx9PdLIw0XQXzDQYDJoNM01A3FJwrHbDlaQ",
-        "Content-Type" : "application/octet-stream"
-    },
-    params: {
-        "path": "/",
-        "mode": "add",
-        "autorename": true,
-        "mute": false
-    }
+	"Authorization" : "Bearer jop_2cNYe7AAAAAAAAAAB6L8o-5SDAx9PdLIw0XQXzDQYDJoNM01A3FJwrHbDlaQ",
 }
+
+const uploadScript = require('worker!../workers/upload.js');
 
 export default class Step4 extends React.Component{
     constructor(props) {
@@ -46,19 +39,70 @@ export default class Step4 extends React.Component{
 
         if(this.state.files.length > 0){
             let file = this.state.files[0];
-            console.log(file);
+            let xhr = new XMLHttpRequest();
+	        xhr.upload.onprogress = function(evt) {
+		        var percentComplete = parseInt(100.0 * evt.loaded / evt.total);
+		        console.warn(percentComplete);
+		        // Upload in progress. Do something here with the percent complete.
+	        };
+
+	        xhr.onload = function() {
+		        if (xhr.status === 200) {
+			        var fileInfo = JSON.parse(xhr.response);
+			        console.info(fileInfo);
+			        // Upload succeeded. Do something here with the file info.
+		        }
+		        else {
+			        var errorMessage = xhr.response || 'Unable to upload file';
+			        console.error(errorMessage);
+			        // Upload failed. Do something here with the error.
+		        }
+	        };
+
+	        xhr.open('POST', _DropBox.postUrl);
+	        xhr.setRequestHeader('Authorization', _DropBox.Authorization);
+	        xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+	        xhr.setRequestHeader('Dropbox-API-Arg', JSON.stringify({
+		        path: '/' +  file.name,
+		        mode: 'add',
+		        autorename: true,
+		        mute: false
+	        }));
+
+	        xhr.send(file);
         }
     }
 
     __onDrop(files){
-        let isValidFile = _.chain(files).map((file)=>{
+        let self = this;
+
+	    let isValidFile = _.chain(files).map((file)=>{
             return _.some(mimeTypes, (type)=>{ return type === file.type}) && file.size <= _50MbtoBytes;
         }).value()[0];
-        //console.log(files[0]);
+
         if(isValidFile){
             this.setState(_.extend(this.state,{
                 files : files
-            }));
+            }),()=>{
+	            if(this.state.files.length > 0){
+		            let file = this.state.files[0];
+		            let worker = new uploadScript();
+		            worker.onmessage = function(e){
+			            let {status, data} = e.data;
+			            if(status === 'UPLOADING'){
+							console.warn(data);
+			            }
+
+			            if(status === 'FINISHED'){
+				            let files = [data];
+				            self.setState(_.extend(self.state.step4, {files : files}),()=>{
+					            db.setItem('step4', self.state.step4);
+				            });
+			            }
+		            }
+		            worker.postMessage({file : file, dropbox : _DropBox});
+	            }
+            });
         }
     }
 
@@ -135,6 +179,7 @@ export default class Step4 extends React.Component{
     render(){
         let files = this.state.files;
         let self = this;
+
         return <div>
             <div className="panel panel-info">
                 <div className="panel-heading">
@@ -150,6 +195,7 @@ export default class Step4 extends React.Component{
                     <div className="row">
                         <div id="formStep4" className="form-horizontal">
                             <div className="form-group">
+	                            {this.state.step4.files.length <= 0 ?
                                 <div className="col-xs-12 col-md-10 col-md-offset-1">
                                     <label>Tải file</label>
                                     <Dropzone onDrop={this.__onDrop} className="dropzone" multiple={false} accept=".zip, .rar, .pdf">
@@ -158,6 +204,7 @@ export default class Step4 extends React.Component{
                                     </Dropzone>
                                     <p className="help-block"></p>
                                 </div>
+	                             : null}
                                 <div className="col-xs-12 col-md-10 col-md-offset-1">
                                     {files.length > 0 ?
                                     <div className="list-group">
