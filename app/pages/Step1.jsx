@@ -3,17 +3,7 @@ import hat from 'hat';
 import db from 'localforage';
 
 import React from 'react';
-
-class historySchool {
-    constructor(dStart, dEnd, ClassName, Score, School){
-        this.historyId = hat();
-        this.dStart = dStart;
-        this.dEnd = dEnd;
-        this.ClassName = ClassName;
-        this.Score = Score;
-        this.School = School;
-    }
-}
+import T from '../libs/getLang.js';
 
 class schoolOpt {
     constructor(schoolOption){
@@ -28,38 +18,35 @@ export default class Step1 extends React.Component {
         this.state = {
             step1: {
                 fullName : null,
-                sex : null,
+                gender : null,
                 DoB : null,
-                bornPlace: null,
+                birthPlace: null,
                 passport: null,
                 passportDate: null,
                 email: null,
-                phone: null,
-                skypeName: null,
+                tel: null,
+                skype: null,
                 address: null,
-                historySchools: [
-                    new historySchool(),
-                    new historySchool(),
-                    new historySchool()
-                ],
+                studyProgress: null,
                 certificate: null,
                 anotherCercate: null,
                 langCercate: null,
                 langScore: null,
                 langDate: null,
                 course: null,
+                grade: null,
                 countries: [],
                 schoolOptions: [
                     new schoolOpt(),
                     new schoolOpt(),
                     new schoolOpt()
                 ],
-                subjectRequire: null,
+                major: null,
                 hobbies: null,
-                costRequire: null,
+                fees: null,
                 scholarship: null,
                 residence: null,
-                studyRequire: null
+                studyEnvi: null
             }
         };
         this._nextStep = this._nextStep.bind(this);
@@ -73,9 +60,9 @@ export default class Step1 extends React.Component {
         let self = this;
         db.getItem('step1').then((step1)=>{
             self.setState(_.extend(this.state.step1,step1),function(){
-                let {sex, countries} = self.state.step1;
-                if(sex){
-                    $(`input[value="${sex}"]`).prop('checked', true);
+                let {gender, countries} = self.state.step1;
+                if(gender){
+                    $(`input[value="${gender}"]`).prop('checked', true);
                 }
                 _.each(countries, (c)=>{
                     $(`input[value="${c}"]`).prop('checked', true);
@@ -86,7 +73,6 @@ export default class Step1 extends React.Component {
 
     componentDidMount() {
         document.title = 'Bước 1 - Thông tin học sinh - Nộp hồ sơ online - SUNRISE VIETNAM Co.,Ltd';
-        var MAX_OPTIONS = 3;
         $('#formStep1')
             .formValidation({
                 framework: 'bootstrap',
@@ -101,73 +87,74 @@ export default class Step1 extends React.Component {
                 },
                 fields: {
                     txtFullname: {
-                        row: '.col-xs-8',
+                        row: '.col-xs-12',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa nhập họ tên'
+                                message: T('step1:NEInput')
                             }
                         }
                     },
-                    txtSex: {
-                        row: '.col-xs-8',
+                    txtGender: {
+                        row: '.col-xs-7',
                         validators: {
                             notEmpty: {
-                                message: 'Xin chọn 1 trong 2'
+                                message: T('step1:NEGender')
                             }
                         }
                     },
                     dDoB: {
-                        row: '.col-xs-8',
+                        row: '.col-xs-12',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa nhập ngày tháng năm sinh'
+                                message: T('step1:NEDoB')
                             }
                         }
                     },
-                    txtBornPlace: {
-                        row: '.col-xs-8',
+                    txtBirthPlace: {
+                        row: '.col-xs-12',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa nhập nơi sinh'
+                                message: T('step1:NEInput')
                             }
                         }
                     },
                     txtPassport: {
-                        row: '.col-xs-8',
+                        row: '.col-xs-12',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa nhập số hộ chiếu'
+                                message: T('step1:NEInput')
                             }
                         }
                     },
                     dPassport: {
-                        row: '.col-xs-8',
+                        row: '.col-xs-12',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa nhập ngày cấp hộ chiếu'
+                                message: T('step1:NEPassportDate')
                             }
                         }
                     },
                     tlTel: {
-                        row: '.col-xs-8',
+                        row: '.col-xs-12',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa nhập số điện thoại'
+                                message: T('step1:NEInput')
                             },
                             regexp: {
                                 regexp: /^[+0-9\s]{8,20}$/,
-                                message: 'Số điện thoại không hợp lệ'
+                                message: T('step1:RETel')
                             }
                         }
                     },
                     eEmail: {
-                        row: '.col-xs-8',
+                        row: '.col-xs-12',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa nhập email'
+                                message: T('step1:NEInput')
                             },
-                            emailAddress: {
-                                message: 'Email không hợp lệ'
+                            regexp: {
+                                regexp: /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/,
+                                message: T('step1:REEmail')
                             }
                         }
                     },
@@ -175,7 +162,15 @@ export default class Step1 extends React.Component {
                         row: '.col-xs-12',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa nhập địa chỉ'
+                                message: T('step1:NEInput')
+                            }
+                        }
+                    },
+                    taStudyProgress: {
+                        row: '.col-xs-12',
+                        validators: {
+                            notEmpty: {
+                                message: T('step1:NEInput')
                             }
                         }
                     },
@@ -183,39 +178,27 @@ export default class Step1 extends React.Component {
                         row: '.col-xs-12',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa nhập tên bằng cấp'
+                                message: T('step1:NEInput')
                             }
                         }
                     },
                     txtLangCercate: {
-                        row: '.col-xs-8',
+                        row: '.col-xs-6',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa chọn bằng ngoại ngữ'
+                                message: T('step1:NELangCer')
                             }
                         }
                     },
                     txtLangScore: {
-                        row: '.col-xs-4',
+                        row: '.col-xs-6',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa nhập điểm'
+                                message: T('step1:NELangScore')
                             },
                             regexp: {
-                                regexp: /^[0-9.]{2,3}$/,
-                                message: 'Điểm không hợp lệ'
-                            }
-                        }
-                    },
-                    dLang: {
-                        row: '.col-xs-12',
-                        validators: {
-                            notEmpty: {
-                                message: 'Bạn chưa chọn ngày thi'
-                            },
-                            date: {
-                                min: 'dDoB',
-                                message: 'Xin nhập ngày thi sau ngày sinh'
+                                regexp: /^[0-9.]{1,3}$/,
+                                message: T('step1:RELangScore')
                             }
                         }
                     },
@@ -223,7 +206,7 @@ export default class Step1 extends React.Component {
                         row: '.col-xs-6',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa chọn khoá học'
+                                message: T('step1:NECourse')
                             }
                         }
                     },
@@ -232,7 +215,7 @@ export default class Step1 extends React.Component {
                         err: '#countryMessage',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa chọn nơi mong muốn du học'
+                                message: T('step1:NECountry')
                             }
                         }
                     },
@@ -240,7 +223,7 @@ export default class Step1 extends React.Component {
                         row: '.col-xs-12',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa nhập ngành học mong muốn'
+                                message: T('step1:NEInput')
                             }
                         }
                     },
@@ -248,7 +231,7 @@ export default class Step1 extends React.Component {
                         row: '.col-xs-12',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa nhập sở thích'
+                                message: T('step1:NEInput')
                             }
                         }
                     },
@@ -256,7 +239,7 @@ export default class Step1 extends React.Component {
                         row: '.col-xs-12',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa nhập yêu cầu chi phí'
+                                message: T('step1:NEInput')
                             }
                         }
                     },
@@ -264,7 +247,7 @@ export default class Step1 extends React.Component {
                         row: '.col-xs-12',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa nhập yêu cầu học bổng'
+                                message: T('step1:NEInput')
                             }
                         }
                     },
@@ -272,7 +255,7 @@ export default class Step1 extends React.Component {
                         row: '.col-xs-12',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa chọn yêu cầu điều kiện sinh hoạt '
+                                message: T('step1:NEResidence')
                             }
                         }
                     },
@@ -280,94 +263,9 @@ export default class Step1 extends React.Component {
                         row: '.col-xs-12',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa chọn yêu cầu môi trường học'
+                                message: T('step1:NEStudyEnvironment')
                             }
                         }
-                    }/*,
-                    dStart: {
-                        row: '.col-xs-12',
-                        validators: {
-                            notEmpty: {
-                                message: 'Bạn chưa chọn ngày bắt đầu'
-                            }
-                        }
-                    },
-                    dEnd: {
-                        validators: {
-                            notEmpty: {
-                                message: 'Bạn chưa chọn ngày kết thúc'
-                            }
-                        }
-                    },
-                    txtClass: {
-                        validators: {
-                            notEmpty: {
-                                message: 'Bạn chưa nhập thông tin học tập'
-                            }
-                        }
-                    },
-                    txtScore: {
-                        validators: {
-                            notEmpty: {
-                                message: 'Bạn chưa nhập điểm số'
-                            },
-                            regexp: {
-                                regexp: /^[0-9,.\s]+$/,
-                                message: 'Điểm số chỉ được điền ký tự số, dấu . hoặc dấu ,'
-                            }
-                        }
-                    },
-                    txtSchool: {
-                        validators: {
-                            notEmpty: {
-                                message: 'Bạn chưa nhập tên trường'
-                            }
-                        }
-                    }*/
-                }
-            })
-            .on('success.validator.fv', function(e, data) {
-                if (data.field === 'eEmail' && data.validator === 'remote') {
-                    var response = data.result;  // response is the result returned by MailGun API
-                    if (response.did_you_mean) {
-                        // Update the message
-                        data.element                    // The field element
-                            .data('fv.messages')        // The message container
-                            .find('[data-fv-validator="remote"][data-fv-for="eEmail"]')
-                            .html('Did you mean ' + response.did_you_mean + '?')
-                            .show();
-                    }
-                }
-            })
-            .on('err.validator.fv', function(e, data) {
-                if (data.field === 'eEmail' && data.validator === 'remote') {
-                    var response = data.result;
-                    // We need to reset the error message
-                    data.element                // The field element
-                        .data('fv.messages')    // The message container
-                        .find('[data-fv-validator="remote"][data-fv-for="email"]')
-                        .html(response.did_you_mean
-                            ? 'Did you mean ' + response.did_you_mean + '?'
-                            : 'The email is not valid')
-                        .show();
-                }
-            })
-            .on('change', '[name="txtLangCercate"]', function(e) {
-                $('#formStep1').formValidation('revalidateField', 'nottest');
-            })
-            .on('success.field.fv', function(e, data) {
-                if (data.fv.getInvalidFields().length > 0) {    // There is invalid field
-                    data.fv.disableSubmitButtons(true);
-                }
-                if (data.field !== 'nottest') {
-                    var channel = $('#formStep1').find('[name="txtLangCercate"]:selected').val();
-                    // User choose given channel
-                    if (channel === 'nottest') {
-                        // Remove the success class from the container
-                        data.element.closest('.form-group').removeClass('has-success');
-
-                        // Hide the tick icon
-                        data.element.data('fv.icon').hide();
                     }
                 }
             })
@@ -441,15 +339,16 @@ export default class Step1 extends React.Component {
 
     render() {
         return <div>
-            <div className="panel panel-info">
-                <div className="panel-heading">
-                    <h3 className="panel-title"><b>
-                        Bước 1 - Thông tin học sinh&nbsp;&nbsp;<span className="glyphicon glyphicon-chevron-right"></span>&nbsp;&nbsp;
-                        <span className="blue">Bước 2</span>&nbsp;&nbsp;<span className="glyphicon glyphicon-chevron-right"></span>&nbsp;&nbsp;
-                        <span className="blue">Bước 3&nbsp;&nbsp;</span><span className="glyphicon glyphicon-chevron-right"></span>&nbsp;&nbsp;
-                        <span className="blue">Bước 4&nbsp;&nbsp;</span><span className="glyphicon glyphicon-chevron-right"></span>&nbsp;&nbsp;
-                        <span className="blue">Bước 5</span>
-                    </b></h3>
+            <div className="panel panel-warning">
+                <div className="panel-heading bgdorange">
+                    <h3 className="panel-title white">
+                        <b>{T('step1:Step1')}&nbsp;&nbsp;</b><img src={require('../photos/line.png')}/>&nbsp;&nbsp;
+                        {T('step1:Step')} 2&nbsp;&nbsp;
+                        <img src={require('../photos/line.png')} className="img-responsive"/>&nbsp;&nbsp;
+                        {T('step1:Step')} 3&nbsp;&nbsp;
+                        <img src={require('../photos/line.png')} className="img-responsive"/>&nbsp;&nbsp;
+                        {T('step1:Step')} 4
+                    </h3>
                 </div>
                 <div className="panel-body">
                     <div className="smallspace"></div>
@@ -458,156 +357,134 @@ export default class Step1 extends React.Component {
                             <form id="formStep1" className="form-horizontal">
                                 <fieldset>
                                     <div className="form-group">
-                                        <label className="control-label col-xs-4 col-md-2">Họ và tên</label>
-                                        <div className="col-xs-8 col-md-4 margin-space">
-                                            <input type="text" name="txtFullname" className="form-control" placeholder="Họ và tên" onChange={this.__inputOnChange} data-state="fullName" value={this.state.step1.fullName}/>
+                                        <label className="control-label col-xs-12 col-md-2">{T('step1:FullName')}</label>
+                                        <div className="col-xs-12 col-md-4 margin-space">
+                                            <input type="text" name="txtFullname" className="form-control" onChange={this.__inputOnChange} data-state="fullName" value={this.state.step1.fullName}/>
                                         </div>
-                                        <label className="control-label col-xs-4 col-md-2">Giới tính</label>
-                                        <div className="col-xs-8 col-md-4 radio radioContainer" >
-                                            <label className="radio-inline" >
-                                                <input type="radio" value="Nam" name="txtSex" onChange={this.__inputOnChange} data-state='sex' />Nam</label>
-                                            <label className="radio-inline">
-                                                <input type="radio" value="Nữ" name="txtSex" onChange={this.__inputOnChange} data-state='sex' />Nữ</label>
+                                        <label id="lblGender" className="control-label col-xs-4 col-md-2">{T('step1:Gender')}</label>
+                                        <div className="col-xs-8 col-md-4 radioContainer">
+                                            <label className="radio-inline col-xs-3" >
+                                                <input type="radio" value="Nam" name="txtGender" onChange={this.__inputOnChange} data-state='gender' />{T('step1:Male')}
+                                            </label>
+                                            <label className="radio-inline col-xs-3">
+                                                <input type="radio" value="Nữ" name="txtGender" onChange={this.__inputOnChange} data-state='gender' />{T('step1:Female')}
+                                            </label>
                                         </div>
                                     </div>
                                     <div className="form-group">
-                                        <label className="control-label col-xs-4 col-md-2">Ngày sinh</label>
-                                        <div className="col-xs-8 col-md-4 margin-space">
+                                        <label className="control-label col-xs-12 col-md-2">{T('step1:DofB')}</label>
+                                        <div className="col-xs-12 col-md-4 margin-space">
                                             <input type="date" className="form-control" name="dDoB"
                                                    placeholder="ngày/tháng/năm sinh" onChange={this.__inputOnChange} data-state="DoB" value={this.state.step1.DoB}/>
                                         </div>
-                                        <label className="control-label col-xs-4 col-md-2">Nơi sinh</label>
-                                        <div className="col-xs-8 col-md-4">
-                                            <input type="text" name="txtBornPlace" className="form-control" placeholder="Nơi sinh" onChange={this.__inputOnChange} data-state="bornPlace" value={this.state.step1.bornPlace}/>
+                                        <label className="control-label col-xs-12 col-md-2">{T('step1:BirthPlace')}</label>
+                                        <div className="col-xs-12 col-md-4">
+                                            <input type="text" name="txtBirthPlace" className="form-control" onChange={this.__inputOnChange} data-state="birthPlace" value={this.state.step1.birthPlace}/>
                                         </div>
                                     </div>
                                     <div className="form-group">
-                                        <label className="control-label col-xs-4 col-md-2">Hộ
-                                            Chiếu</label>
-                                        <div className="col-xs-8 col-md-4 margin-space">
-                                            <input type="text" name="txtPassport" className="form-control"
-                                                   placeholder="Số hộ chiếu" onChange={this.__inputOnChange} data-state="passport" value={this.state.step1.passport}/>
+                                        <label className="control-label col-xs-12 col-md-2">{T('step1:Passport')}</label>
+                                        <div className="col-xs-12 col-md-4 margin-space">
+                                            <input type="text" name="txtPassport" className="form-control" onChange={this.__inputOnChange} data-state="passport" value={this.state.step1.passport}/>
                                         </div>
-                                        <label className="control-label col-xs-4 col-md-2">Ngày cấp</label>
-                                        <div className="col-xs-8 col-md-4">
-                                            <input type="date" name="dPassport" className="form-control" placeholder="Ngày cấp" onChange={this.__inputOnChange} data-state="passportDate" value={this.state.step1.passportDate}/>
+                                        <label className="control-label col-xs-12 col-md-2">{T('step1:PassportDate')}</label>
+                                        <div className="col-xs-12 col-md-4">
+                                            <input type="date" name="dPassport" className="form-control" onChange={this.__inputOnChange} data-state="passportDate" value={this.state.step1.passportDate}/>
                                         </div>
                                     </div>
                                     <div className="form-group">
-                                        <label className="control-label col-xs-4 col-md-2">Số điện
-                                            thoại</label>
-                                        <div className="col-xs-8 col-md-3 margin-space">
-                                            <input type="tel" name="tlTel" className="form-control" placeholder="Số điện thoại" onChange={this.__inputOnChange} data-state="phone" value={this.state.step1.phone}/>
+                                        <label className="control-label col-xs-12 col-md-2">{T('step1:Tel')}</label>
+                                        <div className="col-xs-12 col-md-3 margin-space">
+                                            <input type="tex" name="tlTel" className="form-control" onChange={this.__inputOnChange} data-state="tel" value={this.state.step1.tel}/>
                                         </div>
-                                        <label htmlFor="txtEmail" className="control-label col-xs-4 col-md-2 col-md-1">Email</label>
-                                        <div className="col-xs-8 col-md-3 margin-space">
-                                            <input type="email" name="eEmail" className="form-control" placeholder="Địa chỉ Email" onChange={this.__inputOnChange} data-state="email" value={this.state.step1.email}/>
+                                        <label htmlFor="txtEmail" className="control-label col-xs-12 col-md-2 col-md-1">Email</label>
+                                        <div className="col-xs-12 col-md-3 margin-space">
+                                            <input type="text" name="eEmail" className="form-control" onChange={this.__inputOnChange} data-state="email" value={this.state.step1.email}/>
                                         </div>
-                                        <label className="control-label col-xs-4 col-md-2 col-md-1">Skype</label>
-                                        <div className="col-xs-8 col-md-2">
-                                            <input type="text" name="txtSkype" className="form-control" placeholder="Tên đăng nhập" onChange={this.__inputOnChange} data-state="skypeName" value={this.state.step1.skypeName}/>
+                                        <label className="control-label col-xs-12 col-md-2 col-md-1">{T('step1:Skype')}</label>
+                                        <div className="col-xs-12 col-md-2">
+                                            <input type="text" name="txtSkype" className="form-control" onChange={this.__inputOnChange} data-state="skype" value={this.state.step1.skype}/>
                                         </div>
                                     </div>
                                     <div className="form-group">
-                                        <label className="control-label col-xs-4 col-md-2">Địa chỉ hiện
-                                            tại</label>
-                                        <div className="col-xs-8 col-md-10">
-                                            <textarea name="taAddress" className="form-control" rows="2" width="100%" placeholder="Địa chỉ" onChange={this.__inputOnChange} data-state="address" value={this.state.step1.address}></textarea>
+                                        <label className="control-label col-xs-12 col-md-2">{T('step1:Address')}</label>
+                                        <div className="col-xs-12 col-md-10">
+                                            <textarea name="taAddress" className="form-control" rows="2" width="100%" onChange={this.__inputOnChange} data-state="address" value={this.state.step1.address}></textarea>
                                         </div>
                                     </div>
                                     <hr className="hr-style"/>
                                     <div className="form-group">
-                                        <label className="control-label col-xs-7 col-md-4">Lịch sử học
-                                            tập 3 năm gần
-                                            nhất:</label>
-
-                                        <div className="col-xs-12">
-                                            <table className="table bg-table">
-                                                <thead>
-                                                    <tr>
-                                                        <th width="15%">Từ</th>
-                                                        <th width="15%">Đến</th>
-                                                        <th width="35%">Quá trình học tập</th>
-                                                        <th width="20%">Điểm học tập</th>
-                                                        <th width="15%">Tại trường</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                {this.state.step1.historySchools.map((hs)=>{
-                                                    return <HistorySchool key={hs.historyId} history={hs} onHistoryChange={this.__historySchoolsChange}/>
-                                                })}
-                                                </tbody>
-                                            </table>
+                                        <label className="control-label col-xs-12 col-md-3">{T('step1:StudyProgress')}</label>
+                                        <div className="col-xs-12 col-md-9">
+                                            <textarea name="taStudyProgress" className="form-control" rows="3" width="100%" placeholder={T('step1:PHProgress')} onChange={this.__inputOnChange} data-state="studyProgress" value={this.state.step1.studyProgress}></textarea>
                                         </div>
                                     </div>
                                     <div className="form-group">
-                                        <label className="control-label col-xs-12 col-md-3">Bằng cấp cao nhất hiện có</label>
+                                        <label className="control-label col-xs-12 col-md-3">{T('step1:HighCertificate')}</label>
                                         <div className="col-xs-12 col-md-3 margin-space">
-                                            <input type="text" name="txtHighCercate" className="form-control" placeholder="Tên bằng cấp cao nhất hiện có" onChange={this.__inputOnChange} data-state="certificate" value={this.state.step1.certificate}/>
+                                            <input type="text" name="txtHighCercate" className="form-control" onChange={this.__inputOnChange} data-state="certificate" value={this.state.step1.certificate}/>
                                         </div>
-                                        <label className="control-label col-xs-12 col-md-3">Bằng cấp
-                                            khác (nếu có)</label>
+                                        <label className="control-label col-xs-12 col-md-3">{T('step1:AnotherCertificate')}</label>
                                         <div className="col-xs-12 col-md-3">
-                                            <input type="text" name="txtDifCercate" className="form-control" placeholder="Bằng cấp khác" onChange={this.__inputOnChange} data-state="anotherCercate" value={this.state.step1.anotherCercate}/>
+                                            <input type="text" name="txtDifCercate" className="form-control" onChange={this.__inputOnChange} data-state="anotherCercate" value={this.state.step1.anotherCercate}/>
                                         </div>
                                     </div>
                                     <div className="form-group">
-                                        <label className="control-label col-xs-12 col-md-3">Trình độ ngoại ngữ</label>
-                                        <div className="col-xs-8 col-md-3 selectContainer">
+                                        <label className="control-label col-xs-12 col-md-3">{T('step1:LangCertificate')}</label>
+                                        <div className="col-xs-6 col-md-2 selectContainer">
                                             <select name="txtLangCercate" className="form-control" onChange={this.__inputOnChange} data-state="langCercate" value={this.state.step1.langCercate}>
+                                                <option></option>
                                                 <option value="IELTS">IELTS</option>
                                                 <option value="TOEFL">TOEFL</option>
-                                                <option value="other">Khác</option>
-                                                <option value="nottest">Chưa thi</option>
+                                                <option value="Haven't test">{T('step1:LangNotTest')}</option>
                                             </select>
                                         </div>
-                                        <div className="col-xs-4 col-md-3 hidden">
-                                            <input type="text" className="form-control" placeholder="Bằng ngoại ngữ"/>
+                                        <div className="col-xs-6 col-md-2 margin-space">
+                                            <input type="text" name="txtLangScore" className="form-control" placeholder={T('step1:Score')} onChange={this.__inputOnChange} data-state="langScore" value={this.state.step1.langScore}/>
                                         </div>
-                                        <div className="col-xs-4 col-md-3 margin-space">
-                                            <input type="text"  name="txtLangScore" className="form-control" placeholder="Điểm số" onChange={this.__inputOnChange} data-state="langScore" value={this.state.step1.langScore}/>
-                                        </div>
+                                        <label className="control-label col-xs-12 col-md-2">{T('step1:PassportDate')}</label>
                                         <div className="col-xs-12 col-md-3">
-                                            <input type="date"  name="txtLangDate" className="form-control" placeholder="Ngày thi" onChange={this.__inputOnChange} data-state="langDate" value={this.state.step1.langDate}/>
+                                            <input type="date"  name="txtLangDate" className="form-control" onChange={this.__inputOnChange} data-state="langDate" value={this.state.step1.langDate}/>
                                         </div>
                                     </div>
                                     <hr className="hr-style"/>
                                     <div className="form-group">
-                                        <label className="control-label col-xs-12 col-md-3">Khoá học mong muốn</label>
+                                        <label className="control-label col-xs-12 col-md-3">{T('step1:Course')}</label>
                                         <div className="col-xs-6 col-md-3 selectContainer">
                                             <select name="txtCourse" className="form-control" onChange={this.__inputOnChange} data-state="course" value={this.state.step1.course}>
-                                                <option>Trung học</option>
-                                                <option>Cao đẳng</option>
-                                                <option>Dự bị đại học</option>
-                                                <option>Đại học</option>
-                                                <option>Dự bị thạc sỹ</option>
-                                                <option>Thạc sỹ</option>
-                                                <option>Học tiếng ngắn hạn</option>
-                                                <option>Du học hè</option>
-                                                <option>Khác</option>
+                                                <option></option>
+                                                <option value="High school">{T('step1:High school')}</option>
+                                                <option value="College">{T('step1:College')}</option>
+                                                <option value="Foundation">{T('step1:Foundation')}</option>
+                                                <option value="University">{T('step1:University')}</option>
+                                                <option value="Pre-master">{T('step1:Pre-master')}</option>
+                                                <option value="Master">{T('step1:Master')}</option>
+                                                <option value="Language courses">{T('step1:Language courses')}</option>
+                                                <option value="Summer study course">{T('step1:Summer study course')}</option>
+                                                <option value="Other">{T('step1:Other')}</option>
                                             </select>
                                         </div>
                                         <div className="col-xs-6 col-md-3 hidden">
                                             <input type="text" className="form-control"
                                                    placeholder="Khoá học mong muốn"/>
                                         </div>
-                                        <div className="col-xs-6 col-md-3 hidden">
-                                            <input type="text" className="form-control" placeholder="Lớp"/>
+                                        <div className="col-xs-6 col-md-3">
+                                            <input type="text" className="form-control" onChange={this.__inputOnChange} data-state="grade" value={this.state.step1.grade} placeholder={T('step1:Grade')}/>
                                         </div>
                                     </div>
                                     <div className="form-group">
-                                        <label className="control-label col-xs-12 col-md-3">Nơi mong muốn du học</label>
+                                        <label className="control-label col-xs-12 col-md-3">{T('step1:Country')}</label>
                                         <div className="col-xs-12 col-md-9">
                                             <div className="row">
-                                                <div className="col-xs-12 col-md-4">
+                                                <div className="col-xs-6 col-md-4">
                                                     <div className="checkbox">
                                                         <label className="checkbox">
-                                                            <input type="checkbox" name="chkCountry" id="chkEngland" value="England" onChange={this.__multiCheckboxChange}/> Anh
+                                                            <input type="checkbox" name="chkCountry" id="chkEngland" value="England" onChange={this.__multiCheckboxChange}/> {T('step1:England')}
                                                         </label>
                                                     </div>
                                                     <div className="checkbox">
                                                         <label className="checkbox-inline">
-                                                            <input type="checkbox" name="chkCountry" id="chkUSA" value="USA" onChange={this.__multiCheckboxChange}/> Mỹ
+                                                            <input type="checkbox" name="chkCountry" id="chkUSA" value="USA" onChange={this.__multiCheckboxChange}/> {T('step1:USA')}
                                                         </label>
                                                     </div>
                                                     <div className="checkbox">
@@ -617,7 +494,7 @@ export default class Step1 extends React.Component {
                                                     </div>
                                                     <div className="checkbox">
                                                         <label className="checkbox-inline">
-                                                            <input type="checkbox" name="chkCountry" id="chkAustralia" value="Australia" onChange={this.__multiCheckboxChange}/> Úc
+                                                            <input type="checkbox" name="chkCountry" id="chkAustralia" value="Australia" onChange={this.__multiCheckboxChange}/> {T('step1:Australia')}
                                                         </label>
                                                     </div>
                                                     <div className="checkbox">
@@ -627,11 +504,11 @@ export default class Step1 extends React.Component {
                                                     </div>
                                                     <div className="checkbox">
                                                         <label className="checkbox-inline">
-                                                            <input type="checkbox" name="chkCountry" id="chkFinland" value="Finland" onChange={this.__multiCheckboxChange}/> Phần Lan
+                                                            <input type="checkbox" name="chkCountry" id="chkFinland" value="Finland" onChange={this.__multiCheckboxChange}/> {T('step1:Finland')}
                                                         </label>
                                                     </div>
                                                 </div>
-                                                <div className="col-xs-12 col-md-4">
+                                                <div className="col-xs-6 col-md-4">
                                                     <div className="checkbox">
                                                         <label className="checkbox-inline">
                                                             <input type="checkbox" name="chkCountry" id="chkMalaysia" value="Malaysia" onChange={this.__multiCheckboxChange}/> Malaysia
@@ -641,28 +518,28 @@ export default class Step1 extends React.Component {
                                                         <label className="checkbox">
                                                             <input type="checkbox" name="chkCountry"
                                                                    id="chkThailand" value="Thailand"
-                                                                   onChange={this.__multiCheckboxChange}/> Thái Lan
+                                                                   onChange={this.__multiCheckboxChange}/> {T('step1:Thailand')}
                                                         </label>
                                                     </div>
                                                     <div className="checkbox">
                                                         <label className="checkbox-inline">
                                                             <input type="checkbox" name="chkCountry"
                                                                    id="chkSwitzerland" value="Switzerland"
-                                                                   onChange={this.__multiCheckboxChange}/> Thuỵ Sỹ
+                                                                   onChange={this.__multiCheckboxChange}/> {T('step1:Switzerland')}
                                                         </label>
                                                     </div>
                                                     <div className="checkbox">
                                                         <label className="checkbox-inline">
                                                             <input type="checkbox" name="chkCountry"
                                                                    id="chkChina" value="China"
-                                                                   onChange={this.__multiCheckboxChange}/> Trung Quốc
+                                                                   onChange={this.__multiCheckboxChange}/> {T('step1:China')}
                                                         </label>
                                                     </div>
                                                     <div className="checkbox">
                                                         <label className="checkbox-inline">
                                                             <input type="checkbox" name="chkCountry"
                                                                    id="chkNetherlands" value="Netherlands"
-                                                                   onChange={this.__multiCheckboxChange}/> Hà Lan
+                                                                   onChange={this.__multiCheckboxChange}/> {T('step1:Netherlands')}
                                                         </label>
                                                     </div>
                                                     <div className="checkbox">
@@ -673,33 +550,35 @@ export default class Step1 extends React.Component {
                                                         </label>
                                                     </div>
                                                 </div>
-                                                <div className="col-xs-12 col-md-4">
+                                                <div className="col-xs-6 col-md-4">
                                                     <div className="checkbox">
                                                         <label className="checkbox-inline">
                                                             <input type="checkbox" name="chkCountry"
                                                                    id="chkItaly" value="Italy"
-                                                                   onChange={this.__multiCheckboxChange}/> Ý
+                                                                   onChange={this.__multiCheckboxChange}/> {T('step1:Italy')}
                                                         </label>
                                                     </div>
                                                     <div className="checkbox">
                                                         <label className="checkbox-inline">
                                                             <input type="checkbox" name="chkCountry"
                                                                    id="chkKorea" value="Korea"
-                                                                   onChange={this.__multiCheckboxChange}/> Hàn Quốc
+                                                                   onChange={this.__multiCheckboxChange}/> {T('step1:Korea')}
                                                         </label>
                                                     </div>
                                                     <div className="checkbox">
                                                         <label className="checkbox">
                                                             <input type="checkbox" name="chkCountry"
                                                                    id="chkJapan" value="Japan"
-                                                                   onChange={this.__multiCheckboxChange}/> Nhật
+                                                                   onChange={this.__multiCheckboxChange}/> {T('step1:Japan')}
                                                         </label>
                                                     </div>
+                                                </div>
+                                                <div className="col-xs-6 col-md-4">
                                                     <div className="checkbox">
                                                         <label className="checkbox-inline">
                                                             <input type="checkbox" name="chkCountry"
                                                                    id="chkGermany" value="Germany"
-                                                                   onChange={this.__multiCheckboxChange}/> Đức
+                                                                   onChange={this.__multiCheckboxChange}/> {T('step1:Germany')}
                                                         </label>
                                                     </div>
                                                     <div className="checkbox">
@@ -719,7 +598,7 @@ export default class Step1 extends React.Component {
 
                                     </div>
                                     <div className="form-group">
-                                        <label className="control-label col-xs-12 col-md-3">Trường dự định (nếu có)</label>
+                                        <label className="control-label col-xs-12 col-md-3">{T('step1:SchoolOptions')}</label>
 
                                         <div className="col-xs-12 col-md-9">
                                             {this.state.step1.schoolOptions.map((sp)=>{
@@ -728,36 +607,29 @@ export default class Step1 extends React.Component {
                                         </div>
                                     </div>
                                     <div className="form-group">
-                                        <label className="control-label col-xs-12 col-md-3">Yêu cầu đặc biệt:</label>
+                                        <label className="control-label col-xs-12 col-md-3">{T('step1:Customized requirements')}</label>
                                         <div className="col-xs-12 bg-table">
                                             <div className="form-group">
-                                                <label className="control-label col-xs-12 col-md-3 sublabel">Ngành
-                                                    nghề</label>
+                                                <label className="control-label col-xs-12 col-md-3 sublabel">{T('step1:Major')}</label>
                                                 <div className="col-xs-12 col-md-3 margin-space">
                                                     <input type="text" className="form-control" name="txtSubject"
-                                                           placeholder="Ngành nghề mong muốn"
-                                                           onChange={this.__inputOnChange} data-state="subjectRequire"
-                                                           value={this.state.step1.subjectRequire}/>
+                                                           onChange={this.__inputOnChange} data-state="major"
+                                                           value={this.state.step1.major}/>
                                                 </div>
-                                                <label className="control-label col-xs-12 col-md-3 sublabel">Sở
-                                                    thích</label>
+                                                <label className="control-label col-xs-12 col-md-3 sublabel">{T('step1:Hobbies')}</label>
                                                 <div className="col-xs-12 col-md-3">
-                                                    <input type="text" className="form-control" name="txtHobbies" placeholder="Sở thích"
-                                                           onChange={this.__inputOnChange} data-state="hobbies"
+                                                    <input type="text" className="form-control" name="txtHobbies" onChange={this.__inputOnChange} data-state="hobbies"
                                                            value={this.state.step1.hobbies}/>
                                                 </div>
                                             </div>
                                             <div className="form-group">
-                                                <label className="control-label col-xs-12 col-md-3 sublabel">Mức chi phí
-                                                    du học/năm</label>
+                                                <label className="control-label col-xs-12 col-md-3 sublabel">{T('step1:Fees')}</label>
                                                 <div className="col-xs-12 col-md-3 margin-space">
                                                     <input type="text" className="form-control" name="txtCost"
-                                                           placeholder="Mức chi phí mong muốn"
-                                                           onChange={this.__inputOnChange} data-state="costRequire"
-                                                           value={this.state.step1.costRequire}/>
+                                                           onChange={this.__inputOnChange} data-state="fees"
+                                                           value={this.state.step1.fees}/>
                                                 </div>
-                                                <label className="control-label col-xs-12 col-md-3 sublabel">Học
-                                                    bổng</label>
+                                                <label className="control-label col-xs-12 col-md-3 sublabel">{T('step1:Scholarship')}</label>
 
                                                 <div className="col-xs-12 col-md-3">
                                                     <input type="text" className="form-control" name="txtScholarship" placeholder=""
@@ -766,28 +638,28 @@ export default class Step1 extends React.Component {
                                                 </div>
                                             </div>
                                             <div className="form-group">
-                                                <label className="control-label col-xs-12 col-md-3 sublabel">Điều kiện
-                                                    sinh hoạt</label>
+                                                <label className="control-label col-xs-12 col-md-3 sublabel">{T('step1:ResidenceRequire')}</label>
 
                                                 <div className="col-xs-12 col-md-3 margin-space selectContainer">
                                                     <select className="form-control" name="txtResidence" onChange={this.__inputOnChange} data-state="residence"
                                                             value={this.state.step1.residence}>
-                                                        <option>Ký túc xá</option>
-                                                        <option>Ở cùng gia đình bản xứ</option>
-                                                        <option>Thuê căn hộ ngoài</option>
-                                                        <option>Ở cùng người nhà</option>
+                                                        <option></option>
+                                                        <option value="Dormitory">{T('step1:Dormitory')}</option>
+                                                        <option value="Homestay">{T('step1:Homestay')}</option>
+                                                        <option value="Private apartment">{T('step1:Private apartment')}</option>
+                                                        <option value="With family members">{T('step1:With family members')}</option>
                                                     </select>
                                                 </div>
-                                                <label className="control-label col-xs-12 col-md-3 sublabel">Môi trường
-                                                    học</label>
+                                                <label className="control-label col-xs-12 col-md-3 sublabel">{T('step1:EnvironmentRequire')}</label>
 
                                                 <div className="col-xs-12 col-md-3 selectContainer">
                                                     <select className="form-control" name="txtStudy" onChange={this.__inputOnChange}
-                                                            data-state="studyRequire"
-                                                            value={this.state.step1.studyRequire}>
-                                                        <option>Trung tâm sôi động</option>
-                                                        <option>Ngoại ô, yên bình</option>
-                                                        <option>Không có yêu cầu đặc biệt</option>
+                                                            data-state="studyEnvi"
+                                                            value={this.state.step1.studyEnvi}>
+                                                        <option></option>
+                                                        <option value="City center">{T('step1:City center')}</option>
+                                                        <option value="Suburb area">{T('step1:Suburb area')}</option>
+                                                        <option value="No specific order">{T('step1:No specific order')}</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -800,8 +672,8 @@ export default class Step1 extends React.Component {
                 </div>
                 <div className="panel-footer">
                     <div className="row">
-                        <div className="col-xs-6 col-xs-offset-6 col-md-2 col-md-offset-10">
-                            <button type="button" className="btn btn-primary" onClick={this._nextStep}>Bước <span
+                        <div className="col-xs-6 col-xs-offset-6 col-md-2 col-md-offset-9">
+                            <button type="button" className="btn btn-success" onClick={this._nextStep}>{T('step1:Step')} <span
                                 className="badge">2</span></button>
                         </div>
                     </div>
@@ -810,7 +682,6 @@ export default class Step1 extends React.Component {
         </div>
     }
 }
-
 
 let HistorySchool = React.createClass({
     getInitialState(){
@@ -874,7 +745,7 @@ let HistorySchool = React.createClass({
                     txtScore: {
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa nhập điểm số'
+                                message: 'Bạn chưa nhập điểm số. Nhập 0 nếu chưa thi'
                             },
                             regexp: {
                                 regexp: /^[0-9,.\s]+$/,
@@ -923,8 +794,8 @@ let SchoolOpt = React.createClass({
     },
     render() {
         return <div className="form-group">
-            <div className="col-xs-10 col-md-6">
-                <input type="text" className="form-control" name="options[]" placeholder="Lựa chọn trường" onChange={this.__inputOnChange} data-state="schoolOption"
+            <div className="col-xs-12 col-md-6">
+                <input type="text" className="form-control" name="options[]" placeholder={T('step1:PHSchoolOpt')} onChange={this.__inputOnChange} data-state="schoolOption"
                        value={this.state.schoolOption}/>
             </div>
         </div>

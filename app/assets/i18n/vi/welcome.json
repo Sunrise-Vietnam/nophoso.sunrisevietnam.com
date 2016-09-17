@@ -1,4 +1,6 @@
 {
-  "h4" : "Quý phụ huynh, học sinh vui lòng điền các thông tin dưới đây để Sunrise Vietnam tư vấn chọn trường, học bổng nhanh nhất và chuẩn xác nhất.Cuối đơn sẽ có mục TẢI HỒ SƠ để quý phụ huynh, học sinh gửi các bản scan bằng cấp, học bạ/bảng điểm, thư giới thiệu, hộ chiếu để Sunrise Vietnam tiến hành nộp cho trường ngay.",
+  "logos": "logo.png",
+  "h4-1" : "Quý phụ huynh, học sinh vui lòng điền các thông tin sau đây để Sunrise Vietnam tư vấn chọn trường, học bổng nhanh nhất và chuẩn xác nhất. Cuối đơn sẽ có mục TẢI HỒ SƠ để quý phụ huynh, học sinh gửi các bản scan bằng cấp, học bạ/bảng điểm, thư giới thiệu, hộ chiếu để Sunrise Vietnam tiến hành nộp cho trường ngay.",
+  "h4-2": "",
   "btnStart" : "Bắt đầu điền hồ sơ"
 }

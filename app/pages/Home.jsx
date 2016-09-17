@@ -1,8 +1,10 @@
 import React from 'react'
+import Page from '../components/Page.jsx';
 
 import hat from 'hat'
 import _ from 'lodash'
 import db from '../db.js';
+import T from '../libs/getLang.js';
 
 export default class Home extends React.Component{
 	constructor(props){
@@ -17,14 +19,27 @@ export default class Home extends React.Component{
 		this.props.history.pushState(null, "/buoc-1");
 	}
 	render(){
-		let h4 = window.i18n.t('welcome:h4');
-		let button = window.i18n.t('welcome:btnStart');
+		let button = T('welcome:btnStart');
+		let logos = T('welcome:logos');
 		return (
-			<div className="row">
-				<div className="col-xs-12 col-md-10 col-md-offset-1">
-					<div className="jumbotron">
-						<h4>{h4}</h4>
-						<button className="btn btn-primary" onClick={this._startClick}>{button}</button>
+			<div className="col-xs-12">
+				<div className="space"></div>
+				<div className="row special-background">
+					<div className="col-xs-12 text-center">
+						<div className="smallspace"></div>
+						<img id="img-logo" src={require('../photos/logo-en.png')}/>
+						<div className="smallspace"></div>
+					</div>
+					<div className="col-xs-12 col-md-10 col-md-offset-1">
+						<h4 className="text-uppercase text-center mblue">{T('welcome:h4-1')}<br/>{T('welcome:h4-2')}</h4>
+						<button className="btn btn-orange bgorange white text-uppercase center-block" onClick={this._startClick}><b>{button}</b></button>
+						<div className="smallspace"></div>
+					</div>
+					<div className="smallspace"></div>
+				</div>
+				<div className="row">
+					<div className="col-xs-12 col-md-10 col-md-offset-1">
+						<img id="img-bottom" className="center-block img-responsive" src={require('../photos/world.png')}/>
 					</div>
 				</div>
 			</div>

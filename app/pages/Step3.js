@@ -3,6 +3,7 @@ import hat from 'hat';
 import db from 'localforage';
 
 import React from 'react';
+import T from '../libs/getLang.js';
 
 export default class Step3 extends React.Component{
     constructor(props) {
@@ -14,6 +15,7 @@ export default class Step3 extends React.Component{
                 answerC: null
             }
         };
+        this._firstStep = this._firstStep.bind(this);
         this._preStep = this._preStep.bind(this);
         this._nextStep = this._nextStep.bind(this);
         this.__inputOnChange = this.__inputOnChange.bind(this);
@@ -27,7 +29,7 @@ export default class Step3 extends React.Component{
     }
 
     componentDidMount() {
-        document.title = 'Bước 3 - Một số câu hỏi tự luận - Nộp hồ sơ online - SUNRISE VIETNAM Co.,Ltd';
+        document.title = 'Step 3 - Essay questions';
         $('#formStep3')
             .formValidation({
                 framework: 'bootstrap',
@@ -41,32 +43,31 @@ export default class Step3 extends React.Component{
                     invalid: 'field-error'
                 },
                 fields: {
-                    taAnswerA: {
+                    taAnswer: {
                         row: '.col-xs-12',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn chưa nhập câu trả lời'
-                            }
-                        }
-                    },
-                    taAnswerB: {
-                        row: '.col-xs-12',
-                        validators: {
-                            notEmpty: {
-                                message: 'Bạn chưa nhập câu trả lời'
-                            }
-                        }
-                    },
-                    taAnswerC: {
-                        row: '.col-xs-12',
-                        validators: {
-                            notEmpty: {
-                                message: 'Bạn chưa nhập câu trả lời'
+                                message: T('step3:NEAn')
+                            },
+                            stringLength: {
+                                message: T('step3:SLAn'),
+                                /*max: function (value, validator, $field) {
+                                    var regex = /\s+/gi;
+                                    var wordCount = value.trim().replace(regex, ' ').split(' ').length;
+                                    //console.info(value, wordCount, 20-wordCount);
+                                    return 1400;
+                                }*/
+                                max: 2000,
+                                min: 50
                             }
                         }
                     }
                 }
             })
+    }
+    _firstStep(e){
+        e.preventDefault();
+        this.props.history.pushState(null, "/buoc-1");
     }
 
     _preStep(e) {
@@ -94,48 +95,53 @@ export default class Step3 extends React.Component{
 
     render(){
         return <div>
-            <div className="panel panel-info">
+            <div className="panel panel-warning">
                 <div className="panel-heading">
-                    <h3 className="panel-title"><b>
-                        <span className="green">Bước 1&nbsp;&nbsp;</span><span className="glyphicon glyphicon-chevron-right"></span>&nbsp;&nbsp;
-                        <span className="green">Bước 2&nbsp;&nbsp;</span><span className="glyphicon glyphicon-chevron-right"></span>&nbsp;&nbsp;
-                        Bước 3 - Một số câu hỏi tự luận&nbsp;&nbsp;<span className="glyphicon glyphicon-chevron-right"></span>&nbsp;&nbsp;
-                        <span className="blue">Bước 4&nbsp;&nbsp;</span><span className="glyphicon glyphicon-chevron-right"></span>&nbsp;&nbsp;
-                        <span className="blue">Bước 5</span>
-                    </b></h3>
+                    <h3 className="panel-title white">
+                        <a type="button" className="a-header" onClick={this._firstStep}>{T('step1:Step')} 1</a>&nbsp;&nbsp;
+                        <img src={require('../photos/line.png')} className="img-responsive"/>&nbsp;&nbsp;
+                        <a type="button" className="a-header" onClick={this._preStep}>{T('step1:Step')} 2</a>&nbsp;&nbsp;
+                        <img src={require('../photos/line.png')} className="img-responsive"/>&nbsp;&nbsp;
+                        <b>{T('step3:Step3')}&nbsp;&nbsp;</b>
+                        <img src={require('../photos/line.png')} className="img-responsive"/>&nbsp;&nbsp;
+                        {T('step1:Step')} 4
+                    </h3>
                 </div>
                 <div className="panel-body">
+                    <div className="col-xs-12">
+                        <p><i>{T('step3:Note')}</i></p>
+                    </div>
                     <form id="formStep3">
                         <div className="smallspace"></div>
                         <div className="row">
                             <div className="col-md-12">
-                                <h4 className="blue"><b>A. Vì sao bạn nghĩ mình phù hợp với việc du học?</b></h4>
+                                <h4 className="blue"><b>{T('step3:QuestA')}</b></h4>
                             </div>
                             <div className="col-xs-12">
                                 <div className="form-group">
-                                    <textarea rows="5" className="form-control" name="taAnswerA" onChange={this.__inputOnChange} data-state="answerA" value={this.state.step3.answerA}></textarea>
+                                    <textarea rows="5" className="form-control" name="taAnswer" onChange={this.__inputOnChange} data-state="answerA" value={this.state.step3.answerA}></textarea>
                                 </div>
                             </div>
                         </div>
                         <div className="smallspace"></div>
                         <div className="row">
                             <div className="col-md-12">
-                                <h4 className="blue"><b>B. Vì sao bạn nghĩ mình xứng đáng nhận học bổng?</b></h4>
+                                <h4 className="blue"><b>{T('step3:QuestB')}</b></h4>
                             </div>
                             <div className="col-xs-12">
                                 <div className="form-group">
-                                    <textarea rows="5" className="form-control" name="taAnswerB" onChange={this.__inputOnChange} data-state="answerB" value={this.state.step3.answerB}></textarea>
+                                    <textarea rows="5" className="form-control" name="taAnswer" onChange={this.__inputOnChange} data-state="answerB" value={this.state.step3.answerB}></textarea>
                                 </div>
                             </div>
                         </div>
                         <div className="smallspace"></div>
                         <div className="row">
                             <div className="col-md-12">
-                                <h4 className="blue"><b>C. Nếu được 3 điều có thể thay đổi thế giới, bạn muốn thay đổi điều gì?</b></h4>
+                                <h4 className="blue"><b>{T('step3:QuestC')}</b></h4>
                             </div>
                             <div className="col-xs-12">
                                 <div className="form-group">
-                                    <textarea rows="5" className="form-control" name="taAnswerC" onChange={this.__inputOnChange} data-state="answerC" value={this.state.step3.answerC}></textarea>
+                                    <textarea rows="5" className="form-control" name="taAnswer" onChange={this.__inputOnChange} data-state="answerC" value={this.state.step3.answerC}></textarea>
                                 </div>
                             </div>
                         </div>
@@ -143,12 +149,12 @@ export default class Step3 extends React.Component{
                 </div>
                 <div className="panel-footer">
                     <div className="row">
-                        <div className="col-xs-6 col-md-2 col-md-offset-8 text-right">
-                            <button className="btn btn-default" onClick={this._preStep}>Bước <span
+                        <div className="col-xs-6 col-md-2 col-md-offset-7 text-right">
+                            <button className="btn btn-warning" onClick={this._preStep}>{T('step1:Step')} <span
                                 className="badge">2</span></button>
                         </div>
                         <div className="col-xs-6 col-md-2">
-                            <button className="btn btn-primary" onClick={this._nextStep}>Bước <span
+                            <button className="btn btn-success" onClick={this._nextStep}>{T('step1:Step')} <span
                                 className="badge">4</span></button>
                         </div>
                     </div>

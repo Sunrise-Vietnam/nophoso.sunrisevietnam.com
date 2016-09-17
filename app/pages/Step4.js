@@ -1,126 +1,146 @@
+'use strict'
 import _ from 'lodash';
 import hat from 'hat';
 import db from 'localforage';
 
 import React from 'react';
+import T from '../libs/getLang.js';
 import Dropzone from 'react-dropzone';
+import DDP from 'ddp.js';
 
 const request = require('superagent');
 
-const mimeTypes = ['application/x-rar','application/zip', 'application/pdf'];
+var Recaptcha = require('react-gcaptcha');
+
+const mimeTypes = ['application/x-rar', 'application/zip', 'application/pdf'];
 const _50MbtoBytes = 5e+7;
 const _DropBox = {
-    postUrl : 'https://content.dropboxapi.com/2/files/upload',
-	"Authorization" : "Bearer jop_2cNYe7AAAAAAAAAAB6L8o-5SDAx9PdLIw0XQXzDQYDJoNM01A3FJwrHbDlaQ",
+    uploadUrl: 'https://content.dropboxapi.com/2/files/upload',
+    removeUrl: 'https://api.dropboxapi.com/2/files/delete',
+    "Authorization": "Bearer jop_2cNYe7AAAAAAAAAAB6L8o-5SDAx9PdLIw0XQXzDQYDJoNM01A3FJwrHbDlaQ",
 }
 
 const uploadScript = require('worker!../workers/upload.js');
+const removeScript = require('worker!../workers/remove.js');
+const socketServer = 'ws://http://system.sunrisevietnam.com/websocket';
 
-export default class Step4 extends React.Component{
+const reCaptcha = '6Lc7GCATAAAAABlX7fNksGxN7J94ZXN1tfVbXUoD';
+
+export default class Step4 extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             step4: {
                 knownBy: [],
-                files : []
+                files: []
             },
-            files : []
+            files: [],
+            progress: 0,
+            "g-recaptcha-response" : null
         };
+        this._firstStep = this._firstStep.bind(this);
+        this._secondStep = this._secondStep.bind(this);
         this._preStep = this._preStep.bind(this);
         this._nextStep = this._nextStep.bind(this);
         this.__multiCheckboxChange = this.__multiCheckboxChange.bind(this);
 
         this.__onDrop = this.__onDrop.bind(this);
-        this.__uploadFiles = this.__uploadFiles.bind(this);
+        this.__removeFiles = this.__removeFiles.bind(this);
+
+        this.__reCaptcha_callback = this.__reCaptcha_callback.bind(this);
     }
 
-    __uploadFiles(e){
+    __reCaptcha_loaded(){
+        console.log('recaptchaLoaded');
+    }
+
+    __reCaptcha_callback(key){
+        this.setState(_.extend(this.state,{"g-recaptcha-response" : key}));
+    }
+
+    __removeFiles(e) {
         e.preventDefault();
+        if (this.state.step4.files.length > 0) {
+            let file = this.state.step4.files[0];
+            let self = this;
+            let worker = new removeScript();
+            worker.onmessage = function (e) {
+                let {status, data} = e.data;
+                if (status === 'REMOVE') {
+                    console.warn(data);
+                }
 
-        if(this.state.files.length > 0){
-            let file = this.state.files[0];
-            let xhr = new XMLHttpRequest();
-	        xhr.upload.onprogress = function(evt) {
-		        var percentComplete = parseInt(100.0 * evt.loaded / evt.total);
-		        console.warn(percentComplete);
-		        // Upload in progress. Do something here with the percent complete.
-	        };
-
-	        xhr.onload = function() {
-		        if (xhr.status === 200) {
-			        var fileInfo = JSON.parse(xhr.response);
-			        console.info(fileInfo);
-			        // Upload succeeded. Do something here with the file info.
-		        }
-		        else {
-			        var errorMessage = xhr.response || 'Unable to upload file';
-			        console.error(errorMessage);
-			        // Upload failed. Do something here with the error.
-		        }
-	        };
-
-	        xhr.open('POST', _DropBox.postUrl);
-	        xhr.setRequestHeader('Authorization', _DropBox.Authorization);
-	        xhr.setRequestHeader('Content-Type', 'application/octet-stream');
-	        xhr.setRequestHeader('Dropbox-API-Arg', JSON.stringify({
-		        path: '/' +  file.name,
-		        mode: 'add',
-		        autorename: true,
-		        mute: false
-	        }));
-
-	        xhr.send(file);
+                if (status === 'FINISHED') {
+                    self.setState(_.extend(self.state.step4, {files: []}), ()=> {
+                        db.setItem('step4', self.state.step4);
+                    });
+                }
+            }
+            worker.postMessage({file: file, dropbox: _DropBox});
         }
     }
 
-    __onDrop(files){
+    __onDrop(files) {
         let self = this;
 
-	    let isValidFile = _.chain(files).map((file)=>{
-            return _.some(mimeTypes, (type)=>{ return type === file.type}) && file.size <= _50MbtoBytes;
+        let isValidFile = _.chain(files).map((file)=> {
+            return _.some(mimeTypes, (type)=> {
+                    return type === file.type
+                }) && file.size <= _50MbtoBytes;
         }).value()[0];
 
-        if(isValidFile){
-            this.setState(_.extend(this.state,{
-                files : files
-            }),()=>{
-	            if(this.state.files.length > 0){
-		            let file = this.state.files[0];
-		            let worker = new uploadScript();
-		            worker.onmessage = function(e){
-			            let {status, data} = e.data;
-			            if(status === 'UPLOADING'){
-							console.warn(data);
-			            }
+        if (isValidFile) {
+            this.setState(_.extend(this.state, {
+                files: files
+            }), ()=> {
+                if (this.state.files.length > 0) {
+                    let file = this.state.files[0];
+                    let worker = new uploadScript();
+                    worker.onmessage = function (e) {
+                        let {status, data} = e.data;
+                        if (status === 'UPLOADING') {
+                            self.setState(_.extend(self.state, {progress: data}));
+                        }
 
-			            if(status === 'FINISHED'){
-				            let files = [data];
-				            self.setState(_.extend(self.state.step4, {files : files}),()=>{
-					            db.setItem('step4', self.state.step4);
-				            });
-			            }
-		            }
-		            worker.postMessage({file : file, dropbox : _DropBox});
-	            }
+                        if (status === 'FINISHED') {
+                            let files = [data];
+                            self.setState(_.extend(self.state.step4, {files: files}), ()=> {
+                                self.setState(_.extend(self.state, {files: []}))
+                                db.setItem('step4', self.state.step4);
+                            });
+                        }
+                    }
+                    worker.postMessage({file: file, dropbox: _DropBox});
+                }
             });
         }
     }
 
     componentWillMount() {
         let self = this;
-        db.getItem('step4').then((step4)=>{
-            self.setState(_.extend(this.state, { step4 : step4}),function() {
-                let {knownBy} = self.state.step4;
-                _.each(knownBy, (c)=> {
-                    $(`input[value="${c}"]`).prop('checked', true);
-                })
-            });
+        db.getItem('step4').then((step4)=> {
+            if (step4 != null) {
+                self.setState(_.extend(this.state, {step4: step4}), function () {
+                    let {knownBy} = self.state.step4;
+                    _.each(knownBy, (c)=> {
+                        $(`input[value="${c}"]`).prop('checked', true);
+                    })
+                });
+            }
         })
     }
 
     componentDidMount() {
-        document.title = 'Bước 4 - Nộp hồ sơ online - SUNRISE VIETNAM Co.,Ltd';
-        /*$('#formStep4')
+        let options = {
+            endpoint: socketServer,
+            SocketConstructor: WebSocket
+        };
+        this.ddp = new DDP(options);
+        this.ddp.on("connected", function () {
+            console.info("Connected to Server...");
+        });
+        document.title = 'Step 4 - Documents upload';
+        $('#formStep4')
             .formValidation({
                 framework: 'bootstrap',
                 err: {
@@ -135,17 +155,27 @@ export default class Step4 extends React.Component{
                         row: '.col-xs-12',
                         validators: {
                             notEmpty: {
-                                message: 'Bạn cần đồng ý để tiếp tục'
+                                message: T('step4:Noti')
                             }
                         }
                     }
 
                 }
             })
-            .on('err.form.fv', function(e) {
+            .on('err.form.fv', function (e) {
                 // Show the message modal
                 $('#messageModal').modal('show');
-            });*/
+            });
+    }
+
+    _firstStep(e) {
+        e.preventDefault();
+        this.props.history.pushState(null, "/buoc-1");
+    }
+
+    _secondStep(e) {
+        e.preventDefault();
+        this.props.history.pushState(null, "/buoc-2");
     }
 
     _preStep(e) {
@@ -156,112 +186,186 @@ export default class Step4 extends React.Component{
     _nextStep(e) {
         e.preventDefault();
         let isValid = $('#formStep4').data('formValidation').validate().isValid();
-        if(isValid) {
-            this.props.history.pushState(null, "/buoc-5");
+        let isCheckReCaptcha = (this.state['g-recaptcha-response'] !== null);
+        if (isValid && isCheckReCaptcha) {
+            let obj = {};
+            let self = this;
+            db.iterate(function (value, key) {
+                obj[key] = value;
+            }).then(function () {
+                    let register = _.extend({}, obj.step1, {parents: obj.step2, "g-recaptcha-response" : self.state['g-recaptcha-response']}, obj.step3, obj.step4);
+                    const methodId = self.ddp.method('upsertRecord', [register]);
+                    self.ddp.on("result", message => {
+                        if (message.id === methodId && !message.error && message.result) {
+                            console.log(message.result);
+                            self.props.history.pushState(null, "/cam-on");
+                        }
+                    });
+                }
+            ).catch(function (err) {
+                    // This code runs if there were any errors
+                    console.log(err);
+                });
         }
     }
 
-    __multiCheckboxChange(e){
+    __multiCheckboxChange(e) {
         let knownBy = this.state.step4.knownBy;
         let isChecked = e.target.checked;
         let known = e.target.value;
-        if(isChecked){
+        if (isChecked) {
             knownBy = _.union(knownBy, [known])
-        }else{
+        } else {
             knownBy = _.without(knownBy, known);
         }
 
-        this.setState(_.extend(this.state.step4, {knownBy : knownBy}),function(){
+        this.setState(_.extend(this.state.step4, {knownBy: knownBy}), function () {
             db.setItem('step4', this.state.step4);
         });
     }
 
-    render(){
+    render() {
         let files = this.state.files;
         let self = this;
 
         return <div>
-            <div className="panel panel-info">
+            <div className="panel panel-warning">
                 <div className="panel-heading">
-                    <h3 className="panel-title"><b>
-                        <span className="green">Bước 1&nbsp;&nbsp;</span><span className="glyphicon glyphicon-chevron-right"></span>&nbsp;&nbsp;
-                        <span className="green">Bước 2&nbsp;&nbsp;</span><span className="glyphicon glyphicon-chevron-right"></span>&nbsp;&nbsp;
-                        <span className="green">Bước 3&nbsp;&nbsp;</span><span className="glyphicon glyphicon-chevron-right"></span>&nbsp;&nbsp;
-                        Bước 4 - Tải tài liệu&nbsp;&nbsp;<span className="glyphicon glyphicon-chevron-right"></span>&nbsp;&nbsp;
-                        <span className="blue">Bước 5</span>
-                    </b></h3>
+                    <h3 className="panel-title white">
+                        <a type="button" className="a-header" onClick={this._firstStep}>{T('step1:Step')}
+                            1</a>&nbsp;&nbsp;
+                        <img src={require('../photos/line.png')} className="img-responsive"/>&nbsp;&nbsp;
+                        <a type="button" className="a-header" onClick={this._secondStep}>{T('step1:Step')}
+                            2</a>&nbsp;&nbsp;
+                        <img src={require('../photos/line.png')} className="img-responsive"/>&nbsp;&nbsp;
+                        <a type="button" className="a-header" onClick={this._preStep}>{T('step1:Step')}
+                            3</a>&nbsp;&nbsp;
+                        <img src={require('../photos/line.png')} className="img-responsive"/>&nbsp;&nbsp;
+                        <b>{T('step4:Step4')}</b>
+                    </h3>
                 </div>
                 <div className="panel-body">
-                    <div className="row">
-                        <div id="formStep4" className="form-horizontal">
-                            <div className="form-group">
-	                            {this.state.step4.files.length <= 0 ?
+
+                    <div id="formStep4" className="form-horizontal">
+                        <div className="form-group">
+                            {this.state.step4.files.length <= 0 ?
                                 <div className="col-xs-12 col-md-10 col-md-offset-1">
-                                    <label>Tải file</label>
-                                    <Dropzone onDrop={this.__onDrop} className="dropzone" multiple={false} accept=".zip, .rar, .pdf">
-                                        <div><span className="bg-danger">Kéo/thả file vào đây hoặc click để chọn file tải lên.</span></div>
-                                        <div>Kiểu file : pdf, zip hoặc rar, dung lượng tối đa 50 Mb</div>
+                                    <label>{T('step4:Label1')}</label>
+
+                                    <div><p>{T('step4:Div1')}</p></div>
+                                    <Dropzone onDrop={this.__onDrop} className="dropzone" multiple={false}
+                                              accept=".zip, .rar, .pdf">
+                                        <div><span className="bg-danger">{T('step4:Div2')}</span></div>
+                                        <div>{T('step4:Div3')}</div>
+
                                     </Dropzone>
+
                                     <p className="help-block"></p>
                                 </div>
-	                             : null}
-                                <div className="col-xs-12 col-md-10 col-md-offset-1">
-                                    {files.length > 0 ?
+                                : <div className="col-xs-12 col-md-10 col-md-offset-1">
+                                <label>File đã tải</label>
+                                {this.state.step4.files.length > 0 ?
                                     <div className="list-group">
-                                        {files.map((f)=>{
+                                        {this.state.step4.files.map((f)=> {
                                             return <li key={hat()} className="list-group-item">
                                                 <span className="pull-left">{f.name}</span> &nbsp;
-                                                <button className="btn btn-primary btn-xs" onClick={self.__uploadFiles}>Tải lên</button>
+                                                <button className="btn btn-warning btn-xs" onClick={self.__removeFiles}>
+                                                    Xoá
+                                                </button>
                                             </li>
                                         })}
                                     </div> : null }
-                                </div>
+                            </div>}
+                            <div className="col-xs-12 col-md-10 col-md-offset-1">
+                                {this.state.files.length > 0 ?
+                                    <div className="list-group">
+                                        {this.state.files.map((f)=> {
+                                            return <li key={hat()} className="list-group-item">
+                                                <span className="pull-left">{f.name}</span> &nbsp;
+                                                <div className="progress">
+                                                    <div
+                                                        className="progress-bar progress-bar-success progress-bar-striped active"
+                                                        role="progressbar" aria-valuenow={this.state.progress}
+                                                        aria-valuemin="0" aria-valuemax="100"
+                                                        style={{width : `${this.state.progress}%`}}>
+                                                        <span className="sr-only">{this.state.progress}% Complete (success)</span>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        })}
+                                    </div> : null }
                             </div>
-                            <div className="form-group">
-                                <div className="col-xs-12 col-md-10 col-md-offset-1">
-                                    <div className="panel panel-warning">
-                                        <div className="panel-heading">
-                                            <label>Bạn biết đến Sunrise Vietnam từ nguồn nào? Xin vui lòng chia sẻ cùng chúng
-                                                tôi.</label>
-                                            <div className="checkbox">
-                                                <label><input type="checkbox" name="chkKnownBy" value="Facebook" onChange={this.__multiCheckboxChange}/>Facebook</label>
-                                            </div>
-                                            <div className="checkbox">
-                                                <label><input type="checkbox" name="chkKnownBy" value="Google" onChange={this.__multiCheckboxChange}/>Google</label>
-                                            </div>
-                                            <div className="checkbox">
-                                                <label><input type="checkbox" name="chkKnownBy" value="Băng rôn" onChange={this.__multiCheckboxChange}/>Băng rôn</label>
-                                            </div>
-                                            <div className="checkbox">
-                                                <label><input type="checkbox" name="chkKnownBy" value="Qua bạn bè, người thân" onChange={this.__multiCheckboxChange}/>Qua bạn bè, người thân</label>
-                                            </div>
-                                            <div className="checkbox">
-                                                <label><input type="checkbox" name="chkKnownBy" value="CLB trong trường" onChange={this.__multiCheckboxChange}/>CLB trong trường</label>
-                                            </div>
-                                            <div className="checkbox">
-                                                <label><input type="checkbox" name="chkKnownBy" value="Dân trí" onChange={this.__multiCheckboxChange}/>Dân trí</label>
-                                            </div>
-                                            <div className="checkbox">
-                                                <label><input type="checkbox" name="chkKnownBy" value="VnExpress" onChange={this.__multiCheckboxChange}/>VnExpress</label>
-                                            </div>
-                                            <div className="checkbox">
-                                                <label><input type="checkbox" name="chkKnownBy" value="Nguồn khác" onChange={this.__multiCheckboxChange}/>Nguồn khác</label>
-                                            </div>
+                        </div>
+                        <div className="form-group">
+                            <div className="col-xs-12 col-md-10 col-md-offset-1">
+                                <div className="panel panel-warning">
+                                    <div className="panel-footer">
+                                        <label>{T('step4:Label2')}</label>
+
+                                        <div className="checkbox">
+                                            <label><input type="checkbox" name="chkKnownBy" value="Facebook"
+                                                          onChange={this.__multiCheckboxChange}/>Facebook</label>
+                                        </div>
+                                        <div className="checkbox">
+                                            <label><input type="checkbox" name="chkKnownBy" value="Google"
+                                                          onChange={this.__multiCheckboxChange}/>Google</label>
+                                        </div>
+                                        <div className="checkbox">
+                                            <label><input type="checkbox" name="chkKnownBy" value="Băng rôn"
+                                                          onChange={this.__multiCheckboxChange}/>{T('step4:Banner')}
+                                            </label>
+                                        </div>
+                                        <div className="checkbox">
+                                            <label><input type="checkbox" name="chkKnownBy"
+                                                          value="Qua bạn bè, người thân"
+                                                          onChange={this.__multiCheckboxChange}/>{T('step4:FromFriends')}
+                                            </label>
+                                        </div>
+                                        <div className="checkbox">
+                                            <label><input type="checkbox" name="chkKnownBy" value="CLB trong trường"
+                                                          onChange={this.__multiCheckboxChange}/>{T('step4:SchoolClub')}
+                                            </label>
+                                        </div>
+                                        <div className="checkbox">
+                                            <label><input type="checkbox" name="chkKnownBy" value="Dân trí"
+                                                          onChange={this.__multiCheckboxChange}/>Dân trí</label>
+                                        </div>
+                                        <div className="checkbox">
+                                            <label><input type="checkbox" name="chkKnownBy" value="VnExpress"
+                                                          onChange={this.__multiCheckboxChange}/>VnExpress</label>
+                                        </div>
+                                        <div className="checkbox">
+                                            <label><input type="checkbox" name="chkKnownBy" value="Nguồn khác"
+                                                          onChange={this.__multiCheckboxChange}/>{T('step4:OthersSources')}
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="form-group">
-                                <div className="col-xs-12 col-md-10 col-md-offset-1">
-                                    <div className="panel panel-success">
-                                        <div className="panel-heading text-center">
-                                            <div className="checkbox">
-                                                <label>
-                                                    <input type="checkbox" name="chkAgreement" value="true"/>
-                                                    Tôi xác nhận Sunrise Vietnam là đại diện hỗ trợ học sinh hoàn thiện hồ sơ du học
-                                                </label>
-                                            </div>
+                        </div>
+                        <div className="form-group">
+                            <div className="col-xs-12 col-md-10 col-md-offset-1">
+                                <div className="panel panel-success">
+                                    <div className="panel-heading text-center">
+                                        <div className="checkbox">
+                                            <label>
+                                                <h4><input type="checkbox" name="chkAgreement"
+                                                           value="true"/> {T('step4:Checkbox')}</h4>
+                                            </label>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="form-group">
+                            <div className="col-xs-12 col-md-10 col-md-offset-1">
+                                <div className="panel panel-default">
+                                    <div className="panel-heading text-center">
+                                        <Recaptcha
+                                            sitekey={reCaptcha}
+                                            onloadCallback={this.__reCaptcha_loaded}
+                                            verifyCallback={this.__reCaptcha_callback}
+                                            />
                                     </div>
                                 </div>
                             </div>
@@ -270,22 +374,23 @@ export default class Step4 extends React.Component{
                 </div>
                 <div className="panel-footer">
                     <div className="row">
-                        <div className="col-xs-6 col-md-2 col-md-offset-8 text-right">
-                            <button className="btn btn-default" onClick={this._preStep}>Bước <span
+                        <div className="col-xs-6 col-md-2 col-md-offset-7 text-right">
+                            <button className="btn btn-warning" onClick={this._preStep}>{T('step1:Step')} <span
                                 className="badge">3</span></button>
                         </div>
-                        <div className="col-xs-6 col-md-2">
-                            <button className="btn btn-primary" onClick={this._nextStep}>Bước <span
-                                className="badge">5</span></button>
+                        <div className="col-xs-6 col-md-3">
+                            <button className="btn btn-primary text-uppercase" onClick={this._nextStep}>
+                                <b>{T('step4:BtnText')}</b></button>
                         </div>
                     </div>
                 </div>
             </div>
-            <div className="modal fade" id="messageModal" tabIndex="-1" role="dialog" aria-labelledby="agree" aria-hidden="true">
-                <div className="modal-dialog modal-sm">
+            <div className="modal fade" id="messageModal" tabIndex="-1" role="dialog" aria-labelledby="agree"
+                 aria-hidden="true">
+                <div className="modal-dialog">
                     <div className="modal-content">
                         <div className="modal-body">
-                            <div id="errors" className="blue"></div>
+                            <div id="errors" className="blue text-center"></div>
                         </div>
                     </div>
                 </div>

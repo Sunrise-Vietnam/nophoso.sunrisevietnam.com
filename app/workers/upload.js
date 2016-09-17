@@ -28,7 +28,7 @@ onmessage = function(e){
 		}
 	};
 
-	xhr.open('POST', dropbox.postUrl);
+	xhr.open('POST', dropbox.uploadUrl);
 	xhr.setRequestHeader('Authorization', dropbox.Authorization);
 	xhr.setRequestHeader('Content-Type', 'application/octet-stream');
 	xhr.setRequestHeader('Dropbox-API-Arg', JSON.stringify({

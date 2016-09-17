@@ -15,6 +15,7 @@
     right: -40px;
     line-height:38px;
 }
+
 .form-control-feedback {
     position: absolute;
     display:block;
@@ -22,21 +23,19 @@
     height:38px;
     line-height:38px;
 }
-.jumbotron{
-    margin-top: 20%;
-    margin-bottom: 20%;
-}
-.blue, input.form-control, select.form-control, textarea.form-control   {
+body, .blue, input.form-control, select.form-control, textarea.form-control, .blue>.help-block   {
     color: #06162f;
 }
 hr.hr-style {
     border: 0;
     height: 1px;
-    background: #24a2fb;
     background-image: linear-gradient(to right, #fbfafa, #24a2fb, #fbfafa);
 }
 .smallspace {
     height: 20px
+}
+.space {
+    height: 40px
 }
 .form-control {
     border: solid 1px #06162f;
@@ -58,7 +57,6 @@ hr.hr-style {
 :-ms-input-placeholder {
     font-style: italic;
 }
-
 .sublabel {
     font-weight: normal;
 }
@@ -75,9 +73,64 @@ hr.hr-style {
 .green {
     color: #398439;
 }
-
+.bgorange{
+    background-color: #f37715;
+}
+.bgorange:hover{
+    box-shadow: 2px 2px 1px #9e5c2f;
+}
+.bgdorange {
+    background-color: #e17200;
+}
+.white,.white:hover,.white:focus,.white:active {
+    color: #ffffff;
+}
 .bgwhite {
     background-color: #fff6de;
+}
+.mblue {
+    color: #3251a8;
+    font-weight: 600;
+}
+#img-bottom {
+    z-index: -1;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+.flags {
+    z-index: 221;
+    position: absolute;
+}
+.btn-orange {
+    padding: 10px 20px 10px 20px;
+    font-size: 20px;
+    border-radius: 7px;
+}
+.panel-warning, .panel-success {
+    border-radius: 0px
+}
+.panel-warning {
+    border-color: #ffcc80;
+    border-radius: 0px
+}
+.panel-warning>.panel-heading {
+    padding: 0 15px 0 15px;
+    background-image: linear-gradient(to bottom, #ff944d, #e17200);
+    border: solid 1px #ff944d;
+    border-radius: 0px
+}
+.panel-warning>.panel-footer {
+    background-color: #fcf8e3;
+    border-top: solid 1px #faebcc;
+    border-radius: 0px
+}
+.img-responsive {
+    display: inline-block;
+}
+.form-horizontal .radio {
+    padding-top: 0;
 }
 @media (max-width: 991px) {
     .margin-space{
@@ -86,8 +139,12 @@ hr.hr-style {
     hr.hr-style {
         margin: 25px 20px 25px 20px;
     }
+    .flags {
+        right: 5px;
+        top: 0
+    }
     .panel-title {
-        font-size: 18px;
+        font-size: 17px;
     }
     h4 {
         font-size: 14px;
@@ -96,10 +153,28 @@ hr.hr-style {
     .form-horizontal .control-label {
         text-align: left;
     }
+    #img-logo {
+        width: 20%
+    }
+    #lblGender {
+        padding-top: 7px;
+    }
+    .radioContainer .form-control-feedback {
+        top: 0;
+        right: -90px;
+        line-height:38px;
+    }
+    #img-thanks {
+        height: 20%
+    }
 }
 @media (min-width: 992px) {
     hr.hr-style {
         margin: 50px 120px 50px 120px;
+    }
+    .flags {
+        right: 90px;
+        top: 0
     }
     .panel-title {
         font-size: 20px;
@@ -108,10 +183,32 @@ hr.hr-style {
         font-size: 16px;
         line-height: 30px
     }
+    #img-logo {
+        width: 17%
+    }
+    .radioContainer .form-control-feedback {
+        top: 0;
+        right: -150px;
+        line-height:38px;
+    }
 }
 
 .dropzone{
-    width: auto; height: 70px; border: 2px dashed rgb(102, 102, 102); border-radius: 5px;
+    width: auto; border: 2px dashed #24a2fb; border-radius: 5px;
     padding : 10px 10px;
     font-weight: bold;
+}
+
+.blue>.help-block {
+    font-size: 16px;
+}
+a.a-header {
+    text-decoration: none;
+    cursor: pointer;
+}
+.special-background {
+    background: rgba(252,240,217,0.9);
+    border-radius: 25px;
+    box-shadow: 5px 5px 10px rgba(51,41,3,0.4)
+
 }
